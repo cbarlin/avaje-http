@@ -1,7 +1,8 @@
-package io.avaje.http.maven.openapi;
+package io.avaje.http.openapi.utils;
 
-import io.avaje.http.maven.openapi.jsonb.SchemaCustomAdaptor;
-import io.avaje.jsonb.Json;
+import io.avaje.http.openapi.utils.customser.SchemaCustomAdaptor;
+import io.avaje.jsonb.JsonType;
+import io.avaje.jsonb.Jsonb;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -11,15 +12,13 @@ import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.media.Content;
-import io.swagger.v3.oas.models.media.Discriminator;
-import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
-import io.swagger.v3.oas.models.media.XML;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.tags.Tag;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,13 +27,41 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
- * Utility for merging instances of {@link OpenAPI} together.
+ * Utility for OpenAPI processing
  */
-@Json.Import({OpenAPI.class, MediaType.class, Discriminator.class, XML.class})
-final class OpenAPIMergerUtil {
+public final class OpenAPIUtils {
 
-  private OpenAPIMergerUtil() {
+  private static final JsonType<OpenAPI> openApiType = Jsonb.builder()
+    .serializeEmpty(true)
+    .serializeNulls(false)
+    .failOnNullPrimitives(false)
+    .failOnUnknown(false)
+    .build()
+    .type(OpenAPI.class);
+
+  private OpenAPIUtils() {
     throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
+  }
+
+  /**
+   * Convert an OpenAPI instance to JSON
+   */
+  public static String toJson(final OpenAPI api) {
+    return openApiType.toJsonPretty(api);
+  }
+
+  /**
+   * Parse an OpenAPI instance from a JSON string
+   */
+  public static OpenAPI fromJson(final String json) {
+    return openApiType.fromJson(json);
+  }
+
+  /**
+   * Parse an OpenAPI instance from a JSON string
+   */
+  public static OpenAPI fromJson(final InputStream inputStream) {
+    return openApiType.fromJson(inputStream);
   }
 
   /**
@@ -76,7 +103,7 @@ final class OpenAPIMergerUtil {
       merged.setExternalDocs(merge(primary.getExternalDocs(), secondary.getExternalDocs()));
       merged.setServers(merge(primary.getServers(), secondary.getServers(), Server::getUrl));
       merged.setSecurity(merge(primary.getSecurity(), secondary.getSecurity()));
-      merged.setTags(merge(primary.getTags(), secondary.getTags(), Tag::getName, OpenAPIMergerUtil::merge));
+      merged.setTags(merge(primary.getTags(), secondary.getTags(), Tag::getName, OpenAPIUtils::merge));
       merged.setPaths(merge(primary.getPaths(), secondary.getPaths()));
       merged.setComponents(merge(primary.getComponents(), secondary.getComponents()));
       merged.setExtensions(merge(primary.getExtensions(), secondary.getExtensions()));
@@ -323,8 +350,8 @@ final class OpenAPIMergerUtil {
       return secondary;
     } else {
       final Components merged = new Components();
-      merged.setSchemas(merge(primary.getSchemas(), secondary.getSchemas(), OpenAPIMergerUtil::merge));
-      merged.setResponses(merge(primary.getResponses(), secondary.getResponses(), OpenAPIMergerUtil::merge));
+      merged.setSchemas(merge(primary.getSchemas(), secondary.getSchemas(), OpenAPIUtils::merge));
+      merged.setResponses(merge(primary.getResponses(), secondary.getResponses(), OpenAPIUtils::merge));
       merged.setParameters(merge(primary.getParameters(), secondary.getParameters()));
       merged.setExamples(merge(primary.getExamples(), secondary.getExamples()));
       merged.setRequestBodies(merge(primary.getRequestBodies(), secondary.getRequestBodies()));
@@ -367,7 +394,7 @@ final class OpenAPIMergerUtil {
         .minProperties(firstNonNull(primary.getMinProperties(), secondary.getMinProperties()))
         .required(merge(primary.getRequired(), secondary.getRequired()))
         .not(merge(primary.getNot(), secondary.getNot()))
-        .properties(merge(primary.getProperties(), secondary.getProperties(), OpenAPIMergerUtil::merge, Schema.class))
+        .properties(merge(primary.getProperties(), secondary.getProperties(), OpenAPIUtils::merge, Schema.class))
         .additionalProperties(firstNonNull(primary.getAdditionalProperties(), secondary.getAdditionalProperties()))
         .description(firstNotBlank(primary.getDescription(), secondary.getDescription()))
         .$ref(firstNotBlank(primary.get$ref(), secondary.get$ref()))
@@ -385,7 +412,7 @@ final class OpenAPIMergerUtil {
         .oneOf(merge(primary.getOneOf(), secondary.getOneOf()))
         .items(merge(primary.getItems(), secondary.getItems()))
         .types(firstNonNull(primary.getTypes(), secondary.getTypes()))
-        .patternProperties(merge(primary.getPatternProperties(), secondary.getPatternProperties(), OpenAPIMergerUtil::merge, Schema.class))
+        .patternProperties(merge(primary.getPatternProperties(), secondary.getPatternProperties(), OpenAPIUtils::merge, Schema.class))
         .exclusiveMaximumValue(firstNonNull(primary.getExclusiveMaximumValue(), secondary.getExclusiveMaximumValue()))
         .exclusiveMinimumValue(firstNonNull(primary.getExclusiveMinimumValue(), secondary.getExclusiveMinimumValue()))
         .contains(merge(primary.getContains(), secondary.getContains()))
@@ -407,7 +434,7 @@ final class OpenAPIMergerUtil {
         ._if(merge(primary.getIf(), secondary.getIf()))
         ._else(merge(primary.getElse(), secondary.getElse()))
         .then(merge(primary.getThen(), secondary.getThen()))
-        .dependentSchemas(merge(primary.getDependentSchemas(), secondary.getDependentSchemas(), OpenAPIMergerUtil::merge, Schema.class))
+        .dependentSchemas(merge(primary.getDependentSchemas(), secondary.getDependentSchemas(), OpenAPIUtils::merge, Schema.class))
         .dependentRequired(merge(primary.getDependentRequired(), secondary.getDependentRequired()))
         .$comment(firstNotBlank(primary.get$comment(), secondary.get$comment()))
         .booleanSchemaValue(firstNonNull(primary.getBooleanSchemaValue(), secondary.getBooleanSchemaValue()))
@@ -415,7 +442,7 @@ final class OpenAPIMergerUtil {
         .example(firstNonNull(primary.getExample(), secondary.getExample()))
         ._enum(firstNonNull(primary.getEnum(), secondary.getEnum()))
         ._const(firstNonNull(primary.getConst(), secondary.getConst()))
-      ;
+        ;
     }
   }
 
@@ -463,4 +490,5 @@ final class OpenAPIMergerUtil {
       return merged;
     }
   }
+
 }

@@ -1,4 +1,4 @@
-package io.avaje.http.maven.openapi.jsonb;
+package io.avaje.http.openapi.utils.customser;
 
 import io.avaje.jsonb.Json;
 import io.swagger.v3.oas.models.servers.ServerVariable;

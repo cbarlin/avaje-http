@@ -8,21 +8,17 @@
     <relativePath>..</relativePath>
   </parent>
 
-  <artifactId>openapi-maven-plugin</artifactId>
-  <packaging>maven-plugin</packaging>
-  <name>openapi-maven-plugin</name>
+  <artifactId>http-openapi-utils</artifactId>
+  <packaging>jar</packaging>
+  <name>http-openapi-utils</name>
   <url>https://avaje.io/http</url>
 
   <properties>
     <project.build.outputTimestamp>2026-02-16T09:12:32Z</project.build.outputTimestamp>
     <!-- Dependency Versions -->
     <avaje.jsonb.version>3.11</avaje.jsonb.version>
-    <maven-api.version>3.9.12</maven-api.version>
-    <maven-plugin-tools.version>3.15.2</maven-plugin-tools.version>
     <javadoc-plugin.version>3.12.0</javadoc-plugin.version>
     <swagger.version>2.2.41</swagger.version>
-    <junit.version>4.13.2</junit.version>
-    <jackson.version>2.20.1</jackson.version>
   </properties>
 
   <scm>
@@ -31,27 +27,6 @@
   </scm>
 
   <dependencies>
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-plugin-api</artifactId>
-      <version>${maven-api.version}</version>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-core</artifactId>
-      <version>${maven-api.version}</version>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.maven.plugin-tools</groupId>
-      <artifactId>maven-plugin-annotations</artifactId>
-      <version>${maven-plugin-tools.version}</version>
-      <scope>provided</scope>
-    </dependency>
-
     <dependency>
       <groupId>io.swagger.core.v3</groupId>
       <artifactId>swagger-models</artifactId>
@@ -66,15 +41,8 @@
 
     <dependency>
       <groupId>io.avaje</groupId>
-      <artifactId>http-openapi-utils</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>${junit.version}</version>
-      <scope>test</scope>
+      <artifactId>avaje-jsonb</artifactId>
+      <version>${avaje.jsonb.version}</version>
     </dependency>
   </dependencies>
 
@@ -95,32 +63,6 @@
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-plugin-plugin</artifactId>
-        <version>${maven-plugin-tools.version}</version>
-        <configuration>
-          <goalPrefix>openapi</goalPrefix>
-          <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
-        </configuration>
-        <executions>
-          <execution>
-            <id>default-descriptor</id>
-            <goals>
-              <goal>descriptor</goal>
-            </goals>
-            <phase>process-classes</phase>
-          </execution>
-          <execution>
-            <id>help-descriptor</id>
-            <goals>
-              <goal>helpmojo</goal>
-            </goals>
-            <phase>process-classes</phase>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>${javadoc-plugin.version}</version>
         <executions>
@@ -135,9 +77,6 @@
           </execution>
         </executions>
       </plugin>
-
     </plugins>
-
   </build>
-
 </project>

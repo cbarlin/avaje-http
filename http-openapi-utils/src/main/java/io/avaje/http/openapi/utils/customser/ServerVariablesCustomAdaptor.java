@@ -1,4 +1,4 @@
-package io.avaje.http.maven.openapi.jsonb;
+package io.avaje.http.openapi.utils.customser;
 
 import io.avaje.json.JsonAdapter;
 import io.avaje.json.JsonReader;

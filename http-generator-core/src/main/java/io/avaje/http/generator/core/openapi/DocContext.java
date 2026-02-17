@@ -24,6 +24,7 @@ import io.avaje.http.generator.core.SecuritySchemesPrism;
 import io.avaje.http.generator.core.TagPrism;
 import io.avaje.http.generator.core.TagsPrism;
 import io.avaje.http.generator.core.Util;
+import io.avaje.http.openapi.utils.OpenAPIUtils;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -200,23 +201,27 @@ public class DocContext {
 
   public void readApiDefinition(Element element) {
     final var openApi = OpenAPIDefinitionPrism.getInstanceOn(element);
-    final var info = openApi.info();
-    if (!info.title().isEmpty()) {
-      openAPI.getInfo().setTitle(info.title());
-    }
-    if (!info.description().isEmpty()) {
-      openAPI.getInfo().setDescription(info.description());
-    }
-    if (!info.version().isEmpty()) {
-      openAPI.getInfo().setVersion(info.version());
+    if (openApi != null) {
+      final var info = openApi.info();
+      if (info != null) {
+        if (!info.title().isEmpty()) {
+          openAPI.getInfo().setTitle(info.title());
+        }
+        if (!info.description().isEmpty()) {
+          openAPI.getInfo().setDescription(info.description());
+        }
+        if (!info.version().isEmpty()) {
+          openAPI.getInfo().setVersion(info.version());
+        }
+      }
     }
   }
 
   public void writeApi() {
     try (var metaWriter = createMetaWriter()) {
-      final var json = OpenAPISerializer.serialize(getApiForWriting());
-      JsonFormatter.prettyPrintJson(metaWriter, json);
-
+      final OpenAPI writable = getApiForWriting();
+      final String json = OpenAPIUtils.toJson(writable);
+      metaWriter.append(json);
     } catch (final Exception e) {
       logError(null, "Error writing openapi file" + e.getMessage());
     }

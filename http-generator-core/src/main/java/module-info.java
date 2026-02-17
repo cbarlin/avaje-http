@@ -6,6 +6,7 @@ module io.avaje.http.generator.core {
 
   requires java.sql;
   requires java.compiler;
+  requires io.avaje.http.openapi.utils;
 
   // SHADED: All content after this line will be removed at package time
   requires static io.avaje.prism;
